@@ -93,7 +93,17 @@ O **Python Anaconda 3.9.6** é recomendado porque:
 - ✅ Evita conflitos com outras versões do Python no sistema
 - ✅ Testado e aprovado para builds do Clover Bootloader
 
-**Download:** [Anaconda Python 3.9.6](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg)
+**Downloads por arquitetura:**
+
+| Arquitetura | Download |
+|------------|----------|
+| **Apple Silicon (ARM64)** | [Anaconda3-2021.11-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-arm64.pkg) |
+| **Intel (x86_64)** | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
+
+> **Como saber qual usar?**
+> - **Macs M1/M2/M3/M4**: Use ARM64
+> - **Macs Intel**: Use x86_64
+> - **Dúvida?** Execute no Terminal: `uname -m` (resultado: `arm64` ou `x86_64`)
 
 > **Nota:** O script também funciona com outras versões do Python 3.x, mas o Anaconda 3.9.6 oferece a melhor experiência.
 
