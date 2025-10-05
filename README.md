@@ -2,6 +2,32 @@
 
 Um app bundle para macOS que facilita a compilação do Clover Bootloader através de uma interface simples e intuitiva.
 
+## 🚀 Instalação Rápida (Recomendado)
+
+Execute este comando no Terminal para instalar automaticamente:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/maxpicelli/Clover-Compiler-Builder/main/setup.sh | bash
+```
+
+**O que este comando faz:**
+- ✅ Clona o repositório do GitHub
+- ✅ Cria o aplicativo CloverBuilderv14.app automaticamente
+- ✅ Configura todas as permissões necessárias
+- ✅ Abre a pasta onde foi instalado
+- ✅ Opcionalmente inicia o app
+
+**OU** clone manualmente:
+
+```bash
+git clone https://github.com/maxpicelli/Clover-Compiler-Builder.git
+cd Clover-Compiler-Builder
+chmod +x setup.sh
+./setup.sh
+```
+
+---
+
 ## 📋 Descrição
 
 O Clover Builder v14 é um aplicativo macOS que automatiza o processo de compilação do Clover Bootloader. Ele abre o Terminal automaticamente e executa o script de build, tornando o processo mais acessível e organizado.
