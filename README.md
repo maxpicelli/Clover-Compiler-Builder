@@ -97,10 +97,10 @@ O **Python Anaconda 3.9.x** é recomendado porque:
 
 | Arquitetura | Versão | Python | Download |
 |------------|--------|--------|----------|
-| **Apple Silicon (ARM64)** ⭐ | Anaconda3-2025.06 | 3.13 | [Anaconda3-2025.06-0-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2025.06-0-MacOSX-arm64.pkg) |
-| **Intel (x86_64)** ⭐ | Anaconda3-2025.06 | 3.13 | [Anaconda3-2025.06-0-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2025.06-0-MacOSX-x86_64.pkg) |
-| **Apple Silicon (ARM64)** | Anaconda3-2022.05 | 3.9.13 | [Anaconda3-2022.05-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg) |
-| **Intel (x86_64)** | Anaconda3-2021.11 | 3.9.6 | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
+| **Apple Silicon (ARM64)** ⭐ | v3-2025.06 | 3.13 | [Anaconda3-2025.06-0-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2025.06-0-MacOSX-arm64.pkg) |
+| **Intel (x86_64)** ⭐ | v3-2025.06 | 3.13 | [Anaconda3-2025.06-0-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2025.06-0-MacOSX-x86_64.pkg) |
+| **Apple Silicon (ARM64)** | v3-2022.05 | 3.9.13 | [Anaconda3-2022.05-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg) |
+| **Intel (x86_64)** | v3-2021.11 | 3.9.6 | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
 
 > **⭐ Versão 2025.06 (MAIS RECENTE - RECOMENDADA):**  
 > - ✅ **Testado e funcionando perfeitamente com o script!**
