@@ -97,9 +97,9 @@ O **Python Anaconda 3.9.6** é recomendado porque:
 
 > **Nota:** O script também funciona com outras versões do Python 3.x, mas o Anaconda 3.9.6 oferece a melhor experiência.
 
-## 📝 O que o make_app.sh faz?
+## 📝 O que o criador de app faz?
 
-O script `make_app.sh` automatiza a criação do app bundle:
+O arquivo executável `Criar Clover Builder - make_app` automatiza a criação do app bundle:
 
 1. Detecta automaticamente a pasta onde está localizado
 2. Cria a estrutura de pastas do app bundle (.app/Contents/MacOS e Resources)
@@ -152,26 +152,23 @@ chmod 755 CloverBuilderv14.app/Contents/Resources/builder.sh
 ```
 
 ### Erro "CloverCompilerBuilder.sh não encontrado"
-Certifique-se de que o arquivo `CloverCompilerBuilder.sh` está na mesma pasta que o `make_app.sh` antes de criar o app.
+Certifique-se de que o arquivo `CloverCompilerBuilder.sh` está na mesma pasta que o `Criar Clover Builder - make_app` antes de criar o app.
 
 ## 📂 Portabilidade
 
-O script `make_app.sh` é totalmente portátil! Você pode:
+O criador de app é totalmente portátil! Você pode:
 - Copiar a pasta inteira para qualquer lugar
-- Executar o script em qualquer diretório
+- Executar com duplo clique em qualquer diretório
 - Não precisa editar caminhos hardcoded
 
-O script detecta automaticamente sua localização usando:
-```bash
-BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-```
+O script detecta automaticamente sua localização, tornando tudo simples e fácil.
 
 ## 🔄 Atualizando o App
 
 Para atualizar o app após modificar o script de build:
 
-1. Delete o app antigo (ou apenas sobrescreva)
-2. Execute novamente o `make_app.sh`
+1. Delete o app antigo `CloverBuilderv14.app` (ou apenas sobrescreva)
+2. Dê duplo clique novamente em `Criar Clover Builder - make_app`
 3. O novo app será criado com as alterações
 
 ## 📄 Licença
