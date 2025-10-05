@@ -95,18 +95,26 @@ O **Python Anaconda 3.9.x** é recomendado porque:
 
 **Downloads por arquitetura:**
 
-| Arquitetura | Versão | Download |
-|------------|--------|----------|
-| **Apple Silicon (ARM64)** | Python 3.9.13 | [Anaconda3-2022.05-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg) |
-| **Intel (x86_64)** | Python 3.9.6 | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
+| Arquitetura | Versão | Python | Download |
+|------------|--------|--------|----------|
+| **Apple Silicon (ARM64)** ⭐ | Anaconda3-2025.06 | 3.13 | [Anaconda3-2025.06-0-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2025.06-0-MacOSX-arm64.pkg) |
+| **Intel (x86_64)** ⭐ | Anaconda3-2025.06 | 3.13 | [Anaconda3-2025.06-0-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2025.06-0-MacOSX-x86_64.pkg) |
+| **Apple Silicon (ARM64)** | Anaconda3-2022.05 | 3.9.13 | [Anaconda3-2022.05-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg) |
+| **Intel (x86_64)** | Anaconda3-2021.11 | 3.9.6 | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
+
+> **⭐ Versão 2025.06 (MAIS RECENTE - RECOMENDADA):**  
+> - ✅ **Testado e funcionando perfeitamente com o script!**
+> - Python 3.13 totalmente compatível
+> - Links diretos acima para download rápido
+> - Ou visite: [anaconda.com/download/success](https://www.anaconda.com/download/success)
 
 > **Como saber qual usar?**
-> - **Macs M1/M2/M3/M4**: Use ARM64 (versão 2022.05 com Python 3.9.13)
-> - **Macs Intel**: Use x86_64 (versão 2021.11 com Python 3.9.6)
+> - **Macs M1/M2/M3/M4**: Use ARM64
+> - **Macs Intel**: Use x86_64
 > - **Dúvida?** Execute no Terminal: `uname -m` (resultado: `arm64` ou `x86_64`)
 > - **Macs Apple Silicon também podem usar a versão x86_64 via Rosetta 2**
 
-> **Nota:** O script também funciona com outras versões do Python 3.x, mas as versões Anaconda 3.9.x oferecem a melhor experiência e compatibilidade testada.
+> **Nota:** O script funciona com Python 3.9+ (incluindo 3.13). As versões Anaconda oferecem ambiente completo e estável, sendo a **2025.06 a mais atualizada e recomendada**.
 
 ## 📝 O que o criador de app faz?
 
