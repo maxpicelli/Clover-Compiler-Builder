@@ -44,37 +44,30 @@ O Clover Builder v14 é um aplicativo macOS que automatiza o processo de compila
 
 ```
 pasta-do-projeto/
-├── make_app.sh              # Script para criar o app bundle
-├── CloverCompilerBuilder.sh # Script principal de compilação
-├── icone.icns              # Ícone do aplicativo (ou icone.icon)
-└── CloverBuilderv14.app    # App bundle gerado (após executar make_app.sh)
+├── Criar Clover Builder - make_app  # ← Dê duplo clique aqui para criar o app!
+├── CloverCompilerBuilder.sh         # Script principal de compilação
+├── icone.icns                       # Ícone do aplicativo
+├── setup.sh                         # Script de instalação automática
+└── CloverBuilderv14.app             # App gerado (após criar)
 ```
 
 ## 🚀 Como Usar
 
 ### Primeira vez (Criar o App)
 
-1. **Certifique-se de ter os arquivos necessários na mesma pasta:**
-   - `make_app.sh`
-   - `CloverCompilerBuilder.sh`
-   - `icone.icns` (ou `icone.icon`)
+**É super simples!** Basta dar **duplo clique** no arquivo:
 
-2. **Abra o Terminal e navegue até a pasta do projeto:**
-   ```bash
-   cd /caminho/para/sua/pasta
-   ```
+```
+Criar Clover Builder - make_app
+```
 
-3. **Torne o script executável:**
-   ```bash
-   chmod +x make_app.sh
-   ```
+O aplicativo `CloverBuilderv14.app` será criado automaticamente na mesma pasta! 🎉
 
-4. **Execute o script para criar o app:**
-   ```bash
-   ./make_app.sh
-   ```
-
-5. **Pronto!** O app `CloverBuilderv14.app` será criado na mesma pasta.
+**Alternativa via Terminal:**
+```bash
+cd /caminho/para/sua/pasta
+./"Criar Clover Builder - make_app"
+```
 
 ### Uso Normal
 
@@ -89,7 +82,20 @@ Após criar o app, simplesmente:
 - macOS (qualquer versão moderna)
 - Terminal
 - Xcode Command Line Tools (para compilação do Clover)
+- **Python Anaconda 3.9.6** (recomendado para melhor compatibilidade)
 - Permissões de execução nos scripts
+
+### 🐍 Por que Python Anaconda 3.9.6?
+
+O **Python Anaconda 3.9.6** é recomendado porque:
+- ✅ Máxima compatibilidade com o script de compilação do Clover
+- ✅ Ambiente Python completo e estável
+- ✅ Evita conflitos com outras versões do Python no sistema
+- ✅ Testado e aprovado para builds do Clover Bootloader
+
+**Download:** [Anaconda Python 3.9.6](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg)
+
+> **Nota:** O script também funciona com outras versões do Python 3.x, mas o Anaconda 3.9.6 oferece a melhor experiência.
 
 ## 📝 O que o make_app.sh faz?
 
