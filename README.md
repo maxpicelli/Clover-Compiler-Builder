@@ -82,12 +82,12 @@ Após criar o app, simplesmente:
 - macOS (qualquer versão moderna)
 - Terminal
 - Xcode Command Line Tools (para compilação do Clover)
-- **Python Anaconda 3.9.6** (recomendado para melhor compatibilidade)
+- **Python Anaconda 3.9.x** (3.9.6 para Intel / 3.9.13 para ARM64) - recomendado
 - Permissões de execução nos scripts
 
-### 🐍 Por que Python Anaconda 3.9.6?
+### 🐍 Por que Python Anaconda 3.9.x?
 
-O **Python Anaconda 3.9.6** é recomendado porque:
+O **Python Anaconda 3.9.x** é recomendado porque:
 - ✅ Máxima compatibilidade com o script de compilação do Clover
 - ✅ Ambiente Python completo e estável
 - ✅ Evita conflitos com outras versões do Python no sistema
@@ -95,17 +95,18 @@ O **Python Anaconda 3.9.6** é recomendado porque:
 
 **Downloads por arquitetura:**
 
-| Arquitetura | Download |
-|------------|----------|
-| **Apple Silicon (ARM64)** | [Anaconda3-2021.11-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-arm64.pkg) |
-| **Intel (x86_64)** | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
+| Arquitetura | Versão | Download |
+|------------|--------|----------|
+| **Apple Silicon (ARM64)** | Python 3.9.13 | [Anaconda3-2022.05-MacOSX-arm64.pkg](https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg) |
+| **Intel (x86_64)** | Python 3.9.6 | [Anaconda3-2021.11-MacOSX-x86_64.pkg](https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg) |
 
 > **Como saber qual usar?**
-> - **Macs M1/M2/M3/M4**: Use ARM64
-> - **Macs Intel**: Use x86_64
+> - **Macs M1/M2/M3/M4**: Use ARM64 (versão 2022.05 com Python 3.9.13)
+> - **Macs Intel**: Use x86_64 (versão 2021.11 com Python 3.9.6)
 > - **Dúvida?** Execute no Terminal: `uname -m` (resultado: `arm64` ou `x86_64`)
+> - **Macs Apple Silicon também podem usar a versão x86_64 via Rosetta 2**
 
-> **Nota:** O script também funciona com outras versões do Python 3.x, mas o Anaconda 3.9.6 oferece a melhor experiência.
+> **Nota:** O script também funciona com outras versões do Python 3.x, mas as versões Anaconda 3.9.x oferecem a melhor experiência e compatibilidade testada.
 
 ## 📝 O que o criador de app faz?
 
