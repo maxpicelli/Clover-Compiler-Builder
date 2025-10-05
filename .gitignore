@@ -1,0 +1,48 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# App bundles (gerados automaticamente)
+*.app
+
+# Logs
+*.log
+mpkg.log
+
+# Temporary files
+*.tmp
+*.temp
+*.backup
+*.bak
+
+# Build artifacts
+Build/
+build/
+*.o
+*.obj
+*.a
+*.lib
+*.dylib
+*.so
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Git
+.git/

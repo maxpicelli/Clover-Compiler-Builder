@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Definir diretório base (pasta onde o script está)
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$BASE_DIR" || exit 1
+
+# Criar estrutura
+mkdir -p CloverBuilderv14.app/Contents/MacOS
+mkdir -p CloverBuilderv14.app/Contents/Resources
+
+# Criar Info.plist básico
+cat > CloverBuilderv14.app/Contents/Info.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Clover Builder v14</string>
+    <key>CFBundleDisplayName</key>
+    <string>Clover Builder v14</string>
+    <key>CFBundleExecutable</key>
+    <string>run</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleIconFile</key>
+    <string>icone</string>
+</dict>
+</plist>
+EOF
+
+# Criar launcher que abre o Terminal
+cat > CloverBuilderv14.app/Contents/MacOS/run << 'EOF'
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+osascript -e '
+if application "Terminal" is not running then
+    tell application "Terminal" to activate
+end if
+tell application "Terminal"
+    if not (exists window 1) then
+        do script ""
+    end if
+    set current settings of window 1 to settings set "Basic"
+    do script "cd \"'"$DIR"'/../Resources\" && ./builder.sh" in window 1
+    activate
+end tell'
+EOF
+
+# Copiar seu script
+cp "$BASE_DIR/CloverCompilerBuilder.sh" CloverBuilderv14.app/Contents/Resources/builder.sh
+
+# Copiar o ícone para a pasta Resources
+if [ -f "$BASE_DIR/icone.icns" ]; then
+    cp "$BASE_DIR/icone.icns" CloverBuilderv14.app/Contents/Resources/icone.icns
+    echo "Ícone .icns copiado com sucesso!"
+elif [ -f "$BASE_DIR/icone.icon" ]; then
+    # Se o arquivo for .icon, renomear para .icns
+    cp "$BASE_DIR/icone.icon" CloverBuilderv14.app/Contents/Resources/icone.icns
+    echo "Ícone .icon copiado e renomeado para .icns"
+else
+    echo "AVISO: Arquivo de ícone não encontrado (icone.icns ou icone.icon)"
+fi
+
+# Configurar permissões
+chmod 755 CloverBuilderv14.app/Contents/MacOS/run
+chmod 755 CloverBuilderv14.app/Contents/Resources/builder.sh
+
+# Remover atributos estendidos
+xattr -cr CloverBuilderv14.app
+
+# Atualizar cache de ícones do Finder
+touch CloverBuilderv14.app
+killall Finder 2>/dev/null || true
+
+echo "App Bundle criado com sucesso!"
