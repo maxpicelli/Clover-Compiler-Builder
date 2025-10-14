@@ -2,18 +2,15 @@
 set -euo pipefail
 
 # ============================================================================
-# Clover Compiler Builder v14.1 - Enhanced Version
+# Clover Compiler Builder v14.0 - Fixed Version
 # Based on stable v12.3 with proper repository management
 # + Full compatibility with macOS Tahoe Beta (26.x)
 # + Homebrew tools priority (git, bash, coreutils)
 # + Enhanced AcpiParser fixes from v12.3
 # + Fixed repository validation logic
-# + NEW: Automatic Anaconda detection and activation
-# + NEW: Automatic distutils.util error detection and fixing
-# + NEW: Enhanced dependency checking and installation
 # ============================================================================
 
-SCRIPT_VERSION="14.1-enhanced"
+SCRIPT_VERSION="14.0-fixed"
 SCRIPT_NAME="Clover Compiler Builder"
 WORKDIR="$HOME/src"
 REPO_DIR="$WORKDIR/CloverBootloader"
@@ -269,240 +266,56 @@ detect_macos() {
     fi
 }
 
-# ============================================================================
-# NOVO: Verificador de Dependências Python/Anaconda
-# ============================================================================
-
-# Verificar se Anaconda está instalado
-check_anaconda() {
-    local anaconda_found=false
-    
-    # Verificar conda no PATH
-    if command -v conda >/dev/null 2>&1; then
-        local conda_info=$(conda info --envs 2>/dev/null | grep -E "base|root" | head -1)
-        if [ -n "$conda_info" ]; then
-            anaconda_found=true
-            info "Anaconda/Conda encontrado no PATH"
-        fi
-    fi
-    
-    # Verificar instalações típicas do Anaconda
-    local anaconda_paths=(
-        "/opt/anaconda3"
-        "$HOME/anaconda3"
-        "$HOME/opt/anaconda3"
-        "/usr/local/anaconda3"
-        "/Applications/Anaconda-Navigator.app"
-    )
-    
-    for path in "${anaconda_paths[@]}"; do
-        if [ -d "$path" ]; then
-            anaconda_found=true
-            info "Anaconda encontrado em: $path"
-            break
-        fi
-    done
-    
-    if [ "$anaconda_found" = true ]; then
-        # Tentar ativar o ambiente base
-        if command -v conda >/dev/null 2>&1; then
-            info "Ativando ambiente Anaconda base..."
-            eval "$(conda shell.bash hook)" 2>/dev/null || true
-            conda activate base 2>/dev/null || true
-            ok "Ambiente Anaconda ativado"
-        else
-            warn "Anaconda instalado mas conda não está no PATH"
-            info "Adicione ao ~/.zshrc: export PATH=\"\$HOME/anaconda3/bin:\$PATH\""
-        fi
-    fi
-    
-    return $([ "$anaconda_found" = true ] && echo 0 || echo 1)
-}
-
-# Verificar se distutils.util está disponível
-check_distutils() {
-    local python_cmd="$1"
-    
-    if [ -z "$python_cmd" ]; then
-        return 1
-    fi
-    
-    # Testar importação do distutils.util
-    if "$python_cmd" -c "import distutils.util" 2>/dev/null; then
-        return 0  # Disponível
-    else
-        return 1  # Não disponível
-    fi
-}
-
-# Instalar setuptools automaticamente
-install_setuptools() {
-    local python_cmd="$1"
-    
-    if [ -z "$python_cmd" ]; then
-        err "Comando Python não especificado para instalação do setuptools"
-        return 1
-    fi
-    
-    say "=== Instalando setuptools ==="
-    
-    # Verificar se pip está disponível
-    if ! "$python_cmd" -m pip --version >/dev/null 2>&1; then
-        warn "pip não encontrado. Tentando instalar..."
-        if command -v brew >/dev/null 2>&1; then
-            brew install python-pip 2>/dev/null || true
-        fi
-    fi
-    
-    # Instalar setuptools
-    info "Instalando setuptools via pip..."
-    if "$python_cmd" -m pip install setuptools 2>/dev/null; then
-        ok "setuptools instalado com sucesso!"
-        
-        # Verificar se funcionou
-        if "$python_cmd" -c "import distutils.util" 2>/dev/null; then
-            ok "distutils.util agora está disponível!"
-            return 0
-        else
-            warn "setuptools instalado mas distutils.util ainda não funciona"
-            return 1
-        fi
-    else
-        err "Falha ao instalar setuptools via pip"
-        return 1
-    fi
-}
-
-# Verificar e corrigir problema do distutils
-fix_distutils_issue() {
-    local python_cmd="$1"
-    
-    if check_distutils "$python_cmd"; then
-        ok "distutils.util está funcionando corretamente"
-        return 0
-    fi
-    
-    warn "distutils.util não está disponível - isso causará erro na compilação!"
-    echo
-    info "Este é um problema comum em Python 3.12+ onde distutils foi removido."
-    echo
-    
-    # Tentar instalar setuptools
-    if install_setuptools "$python_cmd"; then
-        return 0
-    fi
-    
-    # Se falhou, mostrar alternativas
-    echo
-    warn "Não foi possível corrigir automaticamente. Alternativas:"
-    echo
-    info "1) Instalar Anaconda 3.9.x (recomendado):"
-    info "   - Intel: https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg"
-    info "   - ARM64: https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg"
-    echo
-    info "2) Usar Python mais antigo:"
-    info "   brew install python@3.9"
-    echo
-    info "3) Instalar manualmente:"
-    info "   $python_cmd -m pip install setuptools"
-    echo
-    
-    read -p "Deseja continuar mesmo assim? (s/N): " answer
-    case "$answer" in
-        [Ss]*)
-            warn "Continuando sem distutils.util - pode falhar na compilação"
-            return 0
-            ;;
-        *)
-            err "Abortando por falta de distutils.util"
-            exit 1
-            ;;
-    esac
-}
-
-# Configure Python with enhanced dependency checking
+# Configure Python with 3.13.7 priority
 configure_python() {
-    say "=== Python Detection & Dependency Check ==="
+    say "=== Python Detection (Priority: 3.13.7) ==="
     
     local found=false
-    local anaconda_available=false
     
-    # Primeiro, verificar se Anaconda está disponível
-    if check_anaconda; then
-        anaconda_available=true
-        info "Anaconda detectado - será priorizado"
-    else
-        warn "Anaconda não encontrado - usando Python do sistema"
-        info "Para melhor compatibilidade, instale Anaconda 3.9.x"
-    fi
-    
-    # Buscar Python (priorizando Anaconda se disponível)
-    local search_commands=()
-    
-    if [ "$anaconda_available" = true ]; then
-        # Se Anaconda está disponível, priorizar seus Pythons
-        search_commands=(python python3 conda python3.9 python3.10 python3.11 python3.12 python3.13)
-    else
-        # Caso contrário, buscar no sistema
-        search_commands=(python3.9 python3.10 python3.11 python3.12 python3.13 python3 python)
-    fi
-    
-    for cmd in "${search_commands[@]}"; do
+    # Check for Python 3.13.7 specifically
+    for cmd in python3.13.7 python3.13 python3 python; do
         if command -v "$cmd" >/dev/null 2>&1; then
             local version=$("$cmd" --version 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f2)
             
-            # Verificar se é uma versão compatível
-            if echo "$version" | grep -qE "^3\.(9|10|11|12|13)\."; then
+            if [ "$version" = "3.13.7" ]; then
                 PYTHON_CMD="$cmd"
                 PYTHON_VERSION="$version"
                 PYTHON_PATH=$(which "$cmd")
                 found=true
-                
-                if [ "$anaconda_available" = true ]; then
-                    ok "Python do Anaconda: $PYTHON_CMD ($version)"
-                else
-                    info "Python do sistema: $PYTHON_CMD ($version)"
-                fi
+                ok "Found Python 3.13.7: $PYTHON_CMD"
                 break
+            elif echo "$version" | grep -q "^3\.13\."; then
+                PYTHON_CMD="$cmd"
+                PYTHON_VERSION="$version"
+                PYTHON_PATH=$(which "$cmd")
+                found=true
+                info "Found Python 3.13.x: $PYTHON_CMD ($version)"
+                break
+            elif echo "$version" | grep -qE "^3\.(1[0-2]|10)\."; then
+                if [ "$found" = false ]; then
+                    PYTHON_CMD="$cmd"
+                    PYTHON_VERSION="$version"
+                    PYTHON_PATH=$(which "$cmd")
+                    found=true
+                    info "Found compatible Python: $PYTHON_CMD ($version)"
+                fi
             fi
         fi
     done
     
-    # Se não encontrou Python compatível, instalar
     if [ "$found" = false ]; then
-        warn "Nenhum Python compatível encontrado!"
-        echo
-        info "Recomendações:"
-        info "1) Instalar Anaconda 3.9.x (melhor opção)"
-        info "2) Instalar Python via Homebrew"
-        echo
-        
-        read -p "Deseja instalar Python 3.9 via Homebrew? (s/N): " answer
-        case "$answer" in
-            [Ss]*)
-                if ! command -v brew >/dev/null 2>&1; then
-                    install_homebrew
-                fi
-                brew install python@3.9
-                PYTHON_CMD="python3.9"
-                PYTHON_VERSION=$(python3.9 --version 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f2)
-                PYTHON_PATH=$(which python3.9)
-                found=true
-                ;;
-            *)
-                err "Python compatível é obrigatório"
-                exit 1
-                ;;
-        esac
-    fi
-    
-    # Verificar e corrigir distutils.util
-    if [ "$found" = true ]; then
-        fix_distutils_issue "$PYTHON_CMD"
+        warn "No suitable Python found. Installing Python 3.13..."
+        if ! command -v brew >/dev/null 2>&1; then
+            install_homebrew
+        fi
+        brew install python@3.13
+        PYTHON_CMD="python3.13"
+        PYTHON_VERSION=$(python3.13 --version 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f2)
+        PYTHON_PATH=$(which python3.13)
     fi
     
     export PYTHON_CMD PYTHON_VERSION PYTHON_PATH
-    ok "Python configurado: $PYTHON_CMD ($PYTHON_VERSION)"
+    ok "Python configured: $PYTHON_CMD ($PYTHON_VERSION)"
 }
 
 # Install Homebrew
@@ -938,26 +751,6 @@ generate_report() {
     ok "Deployment Target: $DEPLOYMENT_TARGET"
     ok "Repository: $REPO_DIR"
     
-    # Show dependency status
-    echo
-    say "=== Dependency Status ==="
-    
-    # Check Anaconda status
-    if check_anaconda >/dev/null 2>&1; then
-        ok "Anaconda: ✅ Instalado e ativo"
-    else
-        warn "Anaconda: ❌ Não encontrado"
-        info "Para melhor compatibilidade, instale Anaconda 3.9.x"
-    fi
-    
-    # Check distutils status
-    if check_distutils "$PYTHON_CMD" >/dev/null 2>&1; then
-        ok "distutils.util: ✅ Funcionando"
-    else
-        warn "distutils.util: ❌ Não disponível"
-        info "Isso pode causar erro 'No module named distutils.util'"
-    fi
-    
     # Show macOS Tahoe specific info
     local major=$(echo "$MACOS_VERSION" | cut -d. -f1)
     if [ "$major" -ge 26 ]; then
@@ -1009,27 +802,6 @@ generate_report() {
     info "  → Option 2: GCC151 (stable)"
     info "  → Option 9: Xcode (if available)"
     echo
-    
-    # Show dependency warnings if needed
-    if ! check_anaconda >/dev/null 2>&1 || ! check_distutils "$PYTHON_CMD" >/dev/null 2>&1; then
-        say "=== ⚠️  IMPORTANTE: Problemas de Dependências Detectados ==="
-        echo
-        if ! check_anaconda >/dev/null 2>&1; then
-            warn "Anaconda não encontrado!"
-            info "Para evitar erros de compilação, instale Anaconda 3.9.x:"
-            info "  • Intel: https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg"
-            info "  • ARM64: https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg"
-            echo
-        fi
-        if ! check_distutils "$PYTHON_CMD" >/dev/null 2>&1; then
-            warn "distutils.util não disponível!"
-            info "Isso causará o erro: 'No module named distutils.util'"
-            info "Solução rápida: $PYTHON_CMD -m pip install setuptools"
-            echo
-        fi
-        info "Execute este script novamente após instalar as dependências!"
-        echo
-    fi
     
     # Tahoe-specific recommendations
     if [ "$major" -ge 26 ]; then
