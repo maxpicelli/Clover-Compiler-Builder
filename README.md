@@ -1,6 +1,6 @@
-# 🍀 Clover Builder v14
+# 🍀 Clover Builder v14.3
 
-Um app bundle para macOS que facilita a compilação do Clover Bootloader através de uma interface simples e intuitiva.
+Um app bundle para macOS que facilita a compilação do Clover Bootloader através de uma interface simples e intuitiva, com gerenciamento automático de dependências e detecção inteligente de binários.
 
 ## 🚀 Instalação Rápida (Recomendado)
 
@@ -30,7 +30,7 @@ chmod +x setup.sh
 
 ## 📋 Descrição
 
-O Clover Builder v14 é um aplicativo macOS que automatiza o processo de compilação do Clover Bootloader. Ele abre o Terminal automaticamente e executa o script de build, tornando o processo mais acessível e organizado.
+O Clover Builder v14.3 é um aplicativo macOS que automatiza o processo de compilação do Clover Bootloader. Ele abre o Terminal automaticamente e executa o script de build, tornando o processo mais acessível e organizado. A versão 14.3 inclui gerenciamento automático de dependências, detecção inteligente de binários compilados e correção automática de problemas comuns.
 
 ## 🎯 Características
 
@@ -39,6 +39,11 @@ O Clover Builder v14 é um aplicativo macOS que automatiza o processo de compila
 - ✅ Abertura automática do Terminal
 - ✅ Script de build integrado
 - ✅ Fácil de usar - basta dar duplo clique
+- ✅ **NOVO v14.3:** Detecção automática de Anaconda
+- ✅ **NOVO v14.3:** Correção automática de dependências Python
+- ✅ **NOVO v14.3:** Verificação e reparo automático do Xcode Command Line Tools
+- ✅ **NOVO v14.3:** Gerenciamento inteligente de binários compilados
+- ✅ **NOVO v14.3:** Compatibilidade aprimorada com macOS Tahoe Beta
 
 ## 📦 Estrutura de Arquivos
 
@@ -76,6 +81,27 @@ Após criar o app, simplesmente:
 1. **Dê duplo clique** no `CloverBuilderv14.app`
 2. O Terminal será aberto automaticamente
 3. O script de build do Clover será executado
+
+## 🆕 Novidades da v14.3
+
+### 🔧 Gerenciamento Automático de Dependências
+- **Detecção automática** de Anaconda instalado
+- **Ativação automática** do ambiente Anaconda base
+- **Correção automática** de problemas com `distutils.util`
+- **Instalação automática** de `setuptools` com múltiplos métodos de fallback
+- **Verificação e reparo** automático do Xcode Command Line Tools
+
+### 📦 Gerenciamento Inteligente de Binários
+- **Detecção automática** de binários compilados salvos
+- **Restauração automática** de binários para evitar downloads desnecessários
+- **Salvamento automático** de binários após compilação bem-sucedida
+- **Opções flexíveis** de gerenciamento (usar atuais, salvar, restaurar salvos)
+
+### 🛠️ Melhorias de Compatibilidade
+- **Compatibilidade aprimorada** com macOS Tahoe Beta (26.x)
+- **Priorização** de ferramentas Homebrew estáveis
+- **Validação robusta** de estrutura de repositório
+- **Tratamento de erros** melhorado com mensagens claras
 
 ## 🔧 Requisitos
 
@@ -208,8 +234,8 @@ Se encontrar problemas:
 
 ---
 
-**Versão:** 14  
-**Última atualização:** Outubro 2025  
-**Compatibilidade:** macOS 10.13+
+**Versão:** 14.3-complete  
+**Última atualização:** Janeiro 2025  
+**Compatibilidade:** macOS 10.13+ (incluindo macOS Tahoe Beta)
 
 🍀 Happy Building!
