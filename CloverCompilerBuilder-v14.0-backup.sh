@@ -2,18 +2,15 @@
 set -euo pipefail
 
 # ============================================================================
-# Clover Compiler Builder v14.3 - Complete Version
+# Clover Compiler Builder v14.0 - Fixed Version
 # Based on stable v12.3 with proper repository management
 # + Full compatibility with macOS Tahoe Beta (26.x)
 # + Homebrew tools priority (git, bash, coreutils)
 # + Enhanced AcpiParser fixes from v12.3
 # + Fixed repository validation logic
-# + NEW: Automatic Anaconda detection and activation
-# + NEW: Automatic distutils.util error detection and fixing
-# + NEW: Enhanced dependency checking and installation
 # ============================================================================
 
-SCRIPT_VERSION="14.3-fixed"
+SCRIPT_VERSION="14.0-fixed"
 SCRIPT_NAME="Clover Compiler Builder"
 WORKDIR="$HOME/src"
 REPO_DIR="$WORKDIR/CloverBootloader"
@@ -56,49 +53,6 @@ backup_copy() { local f="$1"; local bk="${f}.backup.$(timestamp)"; cp "$f" "$bk"
 # ============================================================================
 # NEW: Prioritize Homebrew tools (fix for macOS Tahoe beta issues)
 # ============================================================================
-# Setup environment with Anaconda PATH
-setup_environment() {
-    say "=== Setting Up Environment ==="
-    
-    # Add Anaconda to PATH if it exists
-    local anaconda_paths=(
-        "/opt/anaconda3/bin"
-        "$HOME/anaconda3/bin"
-        "$HOME/opt/anaconda3/bin"
-        "/usr/local/anaconda3/bin"
-    )
-    
-    for path in "${anaconda_paths[@]}"; do
-        if [ -d "$path" ]; then
-            export PATH="$path:$PATH"
-            ok "Anaconda PATH adicionado: $path"
-            break
-        fi
-    done
-    
-    # Add Homebrew to PATH
-    if [ -d "/opt/homebrew" ]; then
-        export PATH="/opt/homebrew/bin:$PATH"
-    elif [ -d "/usr/local/Homebrew" ]; then
-        export PATH="/usr/local/bin:$PATH"
-    fi
-    
-    # Prioritize system Git over old versions
-    if [ -x "/usr/bin/git" ]; then
-        export PATH="/usr/bin:$PATH"
-        ok "Sistema Git priorizado: /usr/bin/git"
-    else
-        # Se não tem Git do sistema, instalar via Homebrew
-        if command -v brew >/dev/null 2>&1; then
-            warn "Git do sistema não encontrado. Instalando Git moderno..."
-            brew install git
-            ok "Git moderno instalado via Homebrew"
-        fi
-    fi
-    
-    ok "Environment configured"
-}
-
 setup_homebrew_environment() {
     say "=== Setting Up Homebrew Environment ==="
     
@@ -144,30 +98,14 @@ setup_homebrew_environment() {
     fi
 }
 
-# Intelligent GNU binaries management with verification
+# Simple GNU binaries management
 manage_gnu_binaries() {
-    say "=== Intelligent GNU Binaries Management ==="
+    say "=== GNU Binaries Management ==="
     
     local safe_binaries="$HOME/src-binaries"
     local download_dir="$REPO_DIR/toolchain/tools/download"
     
     info "Checking for binaries in: $download_dir"
-    
-    # Function to verify binary copy was successful
-    verify_binary_copy() {
-        local source_dir="$1"
-        local dest_dir="$2"
-        local source_count=$(find "$source_dir" -name "*.tar.gz" -o -name "*.tar.xz" 2>/dev/null | wc -l | tr -d ' ')
-        local dest_count=$(find "$dest_dir" -name "*.tar.gz" -o -name "*.tar.xz" 2>/dev/null | wc -l | tr -d ' ')
-        
-        if [ "$source_count" -eq "$dest_count" ] && [ "$dest_count" -gt 0 ]; then
-            ok "Binary copy verified: $dest_count files copied successfully"
-            return 0
-        else
-            warn "Binary copy verification failed: expected $source_count, got $dest_count"
-            return 1
-        fi
-    }
     
     # Check if download directory exists and has binaries
     if [ -d "$download_dir" ]; then
@@ -192,7 +130,7 @@ manage_gnu_binaries() {
             echo "1) Use current binaries in download folder"
             echo "2) Save current binaries to src-binaries for future use"
             if [ "$saved_count" -gt 0 ]; then
-                echo "3) Use saved binaries from src-binaries (replace current)"
+                echo "3) Use saved binaries from src-binaries"
             fi
             echo
             
@@ -205,46 +143,23 @@ manage_gnu_binaries() {
             
             case "$choice" in
                 1)
-                    ok "Using current binaries in download folder"
+                    ok "Using current binaries"
                     ;;
                 2)
                     mkdir -p "$safe_binaries"
                     cp "$download_dir"/*.tar.* "$safe_binaries/" 2>/dev/null
-                    if verify_binary_copy "$download_dir" "$safe_binaries"; then
-                        ok "Binaries saved to src-binaries for future use"
-                    else
-                        warn "Failed to save all binaries to src-binaries"
-                    fi
+                    ok "Binaries saved to src-binaries for future use"
                     ;;
                 3)
                     if [ "$saved_count" -gt 0 ]; then
-                        # Create backup of current binaries
-                        local backup_dir="$download_dir.backup.$(date +%Y%m%d-%H%M%S)"
-                        if [ "$count" -gt 0 ]; then
-                            mkdir -p "$backup_dir"
-                            cp "$download_dir"/*.tar.* "$backup_dir/" 2>/dev/null
-                            info "Current binaries backed up to: $backup_dir"
-                        fi
-                        
-                        # Copy saved binaries to download folder
-                        mkdir -p "$download_dir"
                         cp "$safe_binaries"/*.tar.* "$download_dir/" 2>/dev/null
-                        if verify_binary_copy "$safe_binaries" "$download_dir"; then
-                            ok "Saved binaries restored to download folder"
-                        else
-                            warn "Failed to restore all saved binaries"
-                            # Restore backup if copy failed
-                            if [ -d "$backup_dir" ]; then
-                                cp "$backup_dir"/*.tar.* "$download_dir/" 2>/dev/null
-                                info "Restored backup binaries"
-                            fi
-                        fi
+                        ok "Saved binaries restored to download folder"
                     else
                         warn "No saved binaries found"
                     fi
                     ;;
                 *)
-                    ok "Using current binaries in download folder"
+                    ok "Using current binaries"
                     ;;
             esac
         else
@@ -262,11 +177,7 @@ manage_gnu_binaries() {
                         [Yy]*)
                             mkdir -p "$download_dir"
                             cp "$safe_binaries"/*.tar.* "$download_dir/" 2>/dev/null
-                            if verify_binary_copy "$safe_binaries" "$download_dir"; then
-                                ok "Saved binaries restored successfully"
-                            else
-                                warn "Failed to restore all saved binaries"
-                            fi
+                            ok "Saved binaries restored"
                             ;;
                         *)
                             info "Will download fresh binaries during build"
@@ -294,11 +205,7 @@ manage_gnu_binaries() {
                     [Yy]*)
                         mkdir -p "$download_dir"
                         cp "$safe_binaries"/*.tar.* "$download_dir/" 2>/dev/null
-                        if verify_binary_copy "$safe_binaries" "$download_dir"; then
-                            ok "Download folder created and saved binaries restored successfully"
-                        else
-                            warn "Failed to restore all saved binaries"
-                        fi
+                        ok "Download folder created and saved binaries restored"
                         ;;
                     *)
                         info "Will download fresh binaries during build"
@@ -307,18 +214,6 @@ manage_gnu_binaries() {
             fi
         fi
     fi
-    
-    # Final verification before continuing
-    if [ -d "$download_dir" ]; then
-        local final_count
-        final_count=$(find "$download_dir" -name "*.tar.gz" -o -name "*.tar.xz" 2>/dev/null | wc -l | tr -d ' ')
-        if [ "$final_count" -gt 0 ]; then
-            ok "Ready for build: $final_count binaries available in download folder"
-        else
-            info "No binaries in download folder - buildme will download as needed"
-        fi
-    fi
-    
     echo
 }
 
@@ -371,282 +266,56 @@ detect_macos() {
     fi
 }
 
-# ============================================================================
-# NOVO: Verificador de Dependências Python/Anaconda
-# ============================================================================
-
-# Verificar se Anaconda está instalado
-check_anaconda() {
-    local anaconda_found=false
-    
-    # Verificar conda no PATH
-    if command -v conda >/dev/null 2>&1; then
-        local conda_info=$(conda info --envs 2>/dev/null | grep -E "base|root" | head -1)
-        if [ -n "$conda_info" ]; then
-            anaconda_found=true
-            info "Anaconda/Conda encontrado no PATH"
-        fi
-    fi
-    
-    # Verificar instalações típicas do Anaconda
-    local anaconda_paths=(
-        "/opt/anaconda3"
-        "$HOME/anaconda3"
-        "$HOME/opt/anaconda3"
-        "/usr/local/anaconda3"
-        "/Applications/Anaconda-Navigator.app"
-    )
-    
-    for path in "${anaconda_paths[@]}"; do
-        if [ -d "$path" ]; then
-            anaconda_found=true
-            info "Anaconda encontrado em: $path"
-            break
-        fi
-    done
-    
-    if [ "$anaconda_found" = true ]; then
-        # Tentar ativar o ambiente base
-        if command -v conda >/dev/null 2>&1; then
-            info "Ativando ambiente Anaconda base..."
-            eval "$(conda shell.bash hook)" 2>/dev/null || true
-            conda activate base 2>/dev/null || true
-            ok "Ambiente Anaconda ativado"
-        else
-            warn "Anaconda instalado mas conda não está no PATH"
-            info "Adicione ao ~/.zshrc: export PATH=\"\$HOME/anaconda3/bin:\$PATH\""
-        fi
-    fi
-    
-    return $([ "$anaconda_found" = true ] && echo 0 || echo 1)
-}
-
-# Verificar se distutils.util está disponível
-check_distutils() {
-    local python_cmd="$1"
-    
-    if [ -z "$python_cmd" ]; then
-        return 1
-    fi
-    
-    # Testar importação do distutils.util
-    if "$python_cmd" -c "import distutils.util" 2>/dev/null; then
-        return 0  # Disponível
-    else
-        return 1  # Não disponível
-    fi
-}
-
-# Instalar setuptools automaticamente - VERSÃO ROBUSTA
-install_setuptools() {
-    local python_cmd="$1"
-    
-    if [ -z "$python_cmd" ]; then
-        err "Comando Python não especificado para instalação do setuptools"
-        return 1
-    fi
-    
-    say "=== Instalando setuptools (versão robusta) ==="
-    
-    # Verificar se pip está disponível
-    if ! "$python_cmd" -m pip --version >/dev/null 2>&1; then
-        warn "pip não encontrado. Tentando instalar..."
-        
-        # Instalar pip via Homebrew se disponível
-        if command -v brew >/dev/null 2>&1; then
-            info "Instalando pip via Homebrew..."
-            brew install python-pip 2>/dev/null || true
-        fi
-        
-        # Ou instalar pip via get-pip.py
-        if ! "$python_cmd" -m pip --version >/dev/null 2>&1; then
-            info "Baixando get-pip.py..."
-            curl -sSL https://bootstrap.pypa.io/get-pip.py | "$python_cmd" 2>/dev/null || true
-        fi
-    fi
-    
-    # Tentar múltiplas formas de instalar setuptools
-    info "Tentando instalar setuptools..."
-    
-    # Método 1: pip install
-    if "$python_cmd" -m pip install setuptools --user 2>/dev/null; then
-        ok "setuptools instalado via pip --user"
-    elif "$python_cmd" -m pip install setuptools 2>/dev/null; then
-        ok "setuptools instalado via pip"
-    else
-        # Método 2: easy_install
-        if command -v easy_install >/dev/null 2>&1; then
-            info "Tentando easy_install..."
-            easy_install setuptools 2>/dev/null || true
-        fi
-        
-        # Método 3: Homebrew
-        if command -v brew >/dev/null 2>&1; then
-            info "Tentando via Homebrew..."
-            brew install python-setuptools 2>/dev/null || true
-        fi
-    fi
-    
-    # Verificar se funcionou
-    if "$python_cmd" -c "import distutils.util" 2>/dev/null; then
-        ok "✅ distutils.util agora está disponível!"
-        return 0
-    else
-        warn "setuptools instalado mas distutils.util ainda não funciona"
-        return 1
-    fi
-}
-
-# Verificar e corrigir problema do distutils
-fix_distutils_issue() {
-    local python_cmd="$1"
-    
-    if [ -z "$python_cmd" ]; then
-        err "Comando Python não especificado"
-        return 1
-    fi
-    
-    # Debug: mostrar qual comando está sendo usado
-    info "Testando distutils.util com: $python_cmd"
-    
-    if check_distutils "$python_cmd"; then
-        ok "distutils.util está funcionando corretamente ($python_cmd)"
-        return 0
-    fi
-    
-    warn "distutils.util não está disponível - isso causará erro na compilação!"
-    echo
-    info "Este é um problema comum em Python 3.12+ onde distutils foi removido."
-    echo
-    
-    # Tentar instalar setuptools
-    if install_setuptools "$python_cmd"; then
-        return 0
-    fi
-    
-    # Se falhou, mostrar alternativas
-    echo
-    warn "Não foi possível corrigir automaticamente. Alternativas:"
-    echo
-    info "1) Instalar Anaconda 3.9.x (recomendado):"
-    info "   - Intel: https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg"
-    info "   - ARM64: https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg"
-    echo
-    info "2) Usar Python mais antigo:"
-    info "   brew install python@3.9"
-    echo
-    info "3) Instalar manualmente:"
-    info "   $python_cmd -m pip install setuptools"
-    echo
-    
-    read -p "Deseja continuar mesmo assim? (s/N): " answer
-    case "$answer" in
-        [Ss]*)
-            warn "Continuando sem distutils.util - pode falhar na compilação"
-            return 0
-            ;;
-        *)
-            err "Abortando por falta de distutils.util"
-            exit 1
-            ;;
-    esac
-}
-
-# Configure Python with enhanced dependency checking
+# Configure Python with 3.13.7 priority
 configure_python() {
-    say "=== Python Detection & Dependency Check ==="
+    say "=== Python Detection (Priority: 3.13.7) ==="
     
     local found=false
-    local anaconda_available=false
     
-    # Primeiro, verificar se Anaconda está disponível E é compatível
-    if check_anaconda; then
-        # Verificar se o Python do Anaconda é compatível (tem distutils)
-        local anaconda_python=""
-        if command -v conda >/dev/null 2>&1; then
-            anaconda_python=$(conda run python -c "import sys; print(sys.executable)" 2>/dev/null || echo "")
-        fi
-        
-        if [ -n "$anaconda_python" ]; then
-            local anaconda_version=$("$anaconda_python" --version 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f2)
-            local major_version=$(echo "$anaconda_version" | cut -d. -f1)
-            local minor_version=$(echo "$anaconda_version" | cut -d. -f2)
-            
-            # Python 3.12+ não tem distutils nativo
-            if [ "$major_version" -eq 3 ] && [ "$minor_version" -ge 12 ]; then
-                warn "Anaconda Python $anaconda_version detectado - mas não tem distutils nativo"
-                info "Vamos usar Python do sistema ou instalar Python 3.9"
-                anaconda_available=false
-            else
-                anaconda_available=true
-                info "Anaconda Python $anaconda_version detectado - será priorizado"
-            fi
-        else
-            anaconda_available=false
-            warn "Anaconda detectado mas Python não acessível"
-        fi
-    else
-        warn "Anaconda não encontrado - usando Python do sistema"
-        info "Para melhor compatibilidade, instale Anaconda 3.9.x"
-    fi
-    
-    # Buscar Python (priorizando Anaconda se disponível)
-    local search_commands=()
-    
-    if [ "$anaconda_available" = true ]; then
-        # Se Anaconda está disponível, priorizar seus Pythons
-        search_commands=(python python3 conda python3.9 python3.10 python3.11 python3.12 python3.13)
-    else
-        # Caso contrário, buscar no sistema
-        search_commands=(python3.9 python3.10 python3.11 python3.12 python3.13 python3 python)
-    fi
-    
-    for cmd in "${search_commands[@]}"; do
+    # Check for Python 3.13.7 specifically
+    for cmd in python3.13.7 python3.13 python3 python; do
         if command -v "$cmd" >/dev/null 2>&1; then
             local version=$("$cmd" --version 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f2)
             
-            # Verificar se é uma versão compatível
-            if echo "$version" | grep -qE "^3\.(9|10|11|12|13)\."; then
+            if [ "$version" = "3.13.7" ]; then
                 PYTHON_CMD="$cmd"
                 PYTHON_VERSION="$version"
                 PYTHON_PATH=$(which "$cmd")
                 found=true
-                
-                if [ "$anaconda_available" = true ]; then
-                    ok "Python do Anaconda: $PYTHON_CMD ($version)"
-                else
-                    info "Python do sistema: $PYTHON_CMD ($version)"
-                fi
+                ok "Found Python 3.13.7: $PYTHON_CMD"
                 break
+            elif echo "$version" | grep -q "^3\.13\."; then
+                PYTHON_CMD="$cmd"
+                PYTHON_VERSION="$version"
+                PYTHON_PATH=$(which "$cmd")
+                found=true
+                info "Found Python 3.13.x: $PYTHON_CMD ($version)"
+                break
+            elif echo "$version" | grep -qE "^3\.(1[0-2]|10)\."; then
+                if [ "$found" = false ]; then
+                    PYTHON_CMD="$cmd"
+                    PYTHON_VERSION="$version"
+                    PYTHON_PATH=$(which "$cmd")
+                    found=true
+                    info "Found compatible Python: $PYTHON_CMD ($version)"
+                fi
             fi
         fi
     done
     
-    # Se não encontrou Python compatível, NÃO instalar automaticamente
     if [ "$found" = false ]; then
-        warn "Nenhum Python compatível encontrado!"
-        echo
-        err "Python compatível é obrigatório para compilar Clover"
-        echo
-        info "SOLUÇÕES RECOMENDADAS:"
-        info "1) Instalar Anaconda 3.9.x (RECOMENDADO):"
-        info "   - Intel: https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg"
-        info "   - ARM64: https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg"
-        echo
-        info "2) Ou instalar Python 3.9 via Homebrew:"
-        info "   brew install python@3.9"
-        echo
-        info "Execute este script novamente após instalar Python compatível!"
-        exit 1
-    fi
-    
-    # Verificar e corrigir distutils.util
-    if [ "$found" = true ]; then
-        fix_distutils_issue "$PYTHON_CMD"
+        warn "No suitable Python found. Installing Python 3.13..."
+        if ! command -v brew >/dev/null 2>&1; then
+            install_homebrew
+        fi
+        brew install python@3.13
+        PYTHON_CMD="python3.13"
+        PYTHON_VERSION=$(python3.13 --version 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f2)
+        PYTHON_PATH=$(which python3.13)
     fi
     
     export PYTHON_CMD PYTHON_VERSION PYTHON_PATH
-    ok "Python configurado: $PYTHON_CMD ($PYTHON_VERSION)"
+    ok "Python configured: $PYTHON_CMD ($PYTHON_VERSION)"
 }
 
 # Install Homebrew
@@ -670,159 +339,21 @@ install_homebrew() {
     ok "Homebrew ready"
 }
 
-# Install Python 3.9 with setuptools
-install_python39() {
-    say "=== Installing Python 3.9 + setuptools ==="
-    
-    # Instalar Homebrew se necessário
-    if ! command -v brew >/dev/null 2>&1; then
-        install_homebrew
-    fi
-    
-    # Instalar Python 3.9
-    info "Instalando Python 3.9..."
-    if brew install python@3.9; then
-        ok "Python 3.9 instalado com sucesso!"
-        
-        # Verificar se setuptools está disponível
-        if ! python3.9 -c "import distutils.util" 2>/dev/null; then
-            info "Instalando setuptools para Python 3.9..."
-            python3.9 -m pip install setuptools 2>/dev/null || {
-                warn "Falha ao instalar setuptools via pip, tentando via Homebrew..."
-                brew install python-setuptools 2>/dev/null || true
-            }
-        fi
-        
-        # Verificar se funcionou
-        if python3.9 -c "import distutils.util" 2>/dev/null; then
-            ok "✅ Python 3.9 + setuptools funcionando!"
-        else
-            warn "Python 3.9 instalado mas setutils.util não funciona"
-        fi
-    else
-        err "Falha ao instalar Python 3.9"
-        return 1
-    fi
-}
-
-# Verificar e corrigir Xcode Command Line Tools
-verify_and_fix_xcode() {
-    say "=== Verificação do Xcode Command Line Tools ==="
-    
-    local xcode_path=""
-    local needs_reinstall=false
-    
-    # Verificar se está instalado
-    if xcode-select -p >/dev/null 2>&1; then
-        xcode_path=$(xcode-select -p)
-        ok "Xcode Command Line Tools encontrado: $xcode_path"
-        
-        # Verificar se o make funciona
-        if ! command -v make >/dev/null 2>&1; then
-            err "comando 'make' não encontrado!"
-            needs_reinstall=true
-        elif ! make --version >/dev/null 2>&1; then
-            err "'make' não funciona corretamente!"
-            needs_reinstall=true
-        else
-            local make_version=$(make --version 2>&1 | head -1)
-            ok "make funcionando: $make_version"
-        fi
-        
-        # Verificar se o gcc funciona
-        if ! command -v gcc >/dev/null 2>&1; then
-            warn "comando 'gcc' não encontrado!"
-            needs_reinstall=true
-        fi
-        
-    else
-        err "Xcode Command Line Tools NÃO instalado!"
-        needs_reinstall=true
-    fi
-    
-    # Reinstalar se necessário
-    if [ "$needs_reinstall" = true ]; then
-        echo
-        warn "⚠️  Xcode Command Line Tools precisa ser instalado/corrigido!"
-        echo
-        info "Isso causará erros como:"
-        info "  • 'usr/bin/make -C' error"
-        info "  • 'command not found: gcc'"
-        info "  • Falha na compilação dos BaseTools"
-        echo
-        
-        read -p "Deseja corrigir automaticamente? (s/N): " answer
-        case "$answer" in
-            [Ss]*)
-                say "=== Corrigindo Xcode Command Line Tools ==="
-                
-                # Remover instalação corrompida
-                if [ -d "/Library/Developer/CommandLineTools" ]; then
-                    info "Removendo instalação corrompida..."
-                    sudo rm -rf /Library/Developer/CommandLineTools
-                fi
-                
-                # Resetar xcode-select
-                info "Resetando xcode-select..."
-                sudo xcode-select --reset 2>/dev/null || true
-                
-                # Instalar novamente
-                info "Instalando Xcode Command Line Tools..."
-                xcode-select --install
-                
-                echo
-                warn "⚠️  IMPORTANTE:"
-                info "1. Uma janela vai abrir para instalar o Xcode Command Line Tools"
-                info "2. Clique em 'Instalar' e aguarde a instalação completa"
-                info "3. Após a instalação, pressione Enter aqui para continuar"
-                echo
-                read -p "Pressione Enter após completar a instalação..." dummy
-                
-                # Verificar se funcionou
-                if xcode-select -p >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
-                    # Aceitar licença
-                    info "Aceitando licença do Xcode..."
-                    sudo xcodebuild -license accept 2>/dev/null || true
-                    
-                    ok "✅ Xcode Command Line Tools instalado com sucesso!"
-                    
-                    # Mostrar versões
-                    local make_ver=$(make --version 2>&1 | head -1)
-                    local gcc_ver=$(gcc --version 2>&1 | head -1)
-                    info "make: $make_ver"
-                    info "gcc: $gcc_ver"
-                else
-                    err "Instalação falhou. Tente manualmente:"
-                    info "  sudo rm -rf /Library/Developer/CommandLineTools"
-                    info "  xcode-select --install"
-                    exit 1
-                fi
-                ;;
-            *)
-                err "Xcode Command Line Tools é obrigatório para compilar Clover"
-                echo
-                info "Corrija manualmente:"
-                info "  1. sudo rm -rf /Library/Developer/CommandLineTools"
-                info "  2. xcode-select --install"
-                info "  3. Execute este script novamente"
-                exit 1
-                ;;
-        esac
-    else
-        ok "Xcode Command Line Tools verificado e funcionando!"
-    fi
-}
-
 # Install development tools
 install_dev_tools() {
     say "=== Installing Development Tools ==="
     
-    # Verificar e corrigir Xcode primeiro
-    verify_and_fix_xcode
-    
     # Git
     if ! command -v git >/dev/null 2>&1; then
         brew install git
+    fi
+    
+    # Xcode Command Line Tools
+    if ! xcode-select -p >/dev/null 2>&1; then
+        warn "Installing Xcode Command Line Tools..."
+        xcode-select --install
+        say "Please complete Xcode installation and press Enter..."
+        read dummy
     fi
     
     # Build tools
@@ -1220,34 +751,6 @@ generate_report() {
     ok "Deployment Target: $DEPLOYMENT_TARGET"
     ok "Repository: $REPO_DIR"
     
-    # Show dependency status
-    echo
-    say "=== Dependency Status ==="
-    
-    # Check Xcode status
-    if xcode-select -p >/dev/null 2>&1 && command -v make >/dev/null 2>&1; then
-        ok "Xcode Command Line Tools: ✅ Instalado e funcionando"
-    else
-        warn "Xcode Command Line Tools: ❌ Problema detectado"
-        info "Isso causará erro 'usr/bin/make -C'"
-    fi
-    
-    # Check Anaconda status
-    if check_anaconda >/dev/null 2>&1; then
-        ok "Anaconda: ✅ Instalado e ativo"
-    else
-        warn "Anaconda: ❌ Não encontrado"
-        info "Para melhor compatibilidade, instale Anaconda 3.9.x"
-    fi
-    
-    # Check distutils status - CORRIGIDO
-    if [ -n "$PYTHON_CMD" ] && check_distutils "$PYTHON_CMD" >/dev/null 2>&1; then
-        ok "distutils.util: ✅ Funcionando ($PYTHON_CMD)"
-    else
-        warn "distutils.util: ❌ Não disponível ($PYTHON_CMD)"
-        info "Isso pode causar erro 'No module named distutils.util'"
-    fi
-    
     # Show macOS Tahoe specific info
     local major=$(echo "$MACOS_VERSION" | cut -d. -f1)
     if [ "$major" -ge 26 ]; then
@@ -1300,27 +803,6 @@ generate_report() {
     info "  → Option 9: Xcode (if available)"
     echo
     
-    # Show dependency warnings if needed
-    if ! check_anaconda >/dev/null 2>&1 || ! check_distutils "$PYTHON_CMD" >/dev/null 2>&1; then
-        say "=== ⚠️  IMPORTANTE: Problemas de Dependências Detectados ==="
-        echo
-        if ! check_anaconda >/dev/null 2>&1; then
-            warn "Anaconda não encontrado!"
-            info "Para evitar erros de compilação, instale Anaconda 3.9.x:"
-            info "  • Intel: https://repo.anaconda.com/archive/Anaconda3-2021.11-MacOSX-x86_64.pkg"
-            info "  • ARM64: https://repo.anaconda.com/archive/Anaconda3-2022.05-MacOSX-arm64.pkg"
-            echo
-        fi
-        if ! check_distutils "$PYTHON_CMD" >/dev/null 2>&1; then
-            warn "distutils.util não disponível!"
-            info "Isso causará o erro: 'No module named distutils.util'"
-            info "Solução rápida: $PYTHON_CMD -m pip install setuptools"
-            echo
-        fi
-        info "Execute este script novamente após instalar as dependências!"
-        echo
-    fi
-    
     # Tahoe-specific recommendations
     if [ "$major" -ge 26 ]; then
         say "=== macOS Tahoe Beta Notes ==="
@@ -1362,18 +844,11 @@ main() {
     say "macOS Tahoe Beta Compatible - Full Git Repository Fix"
     echo
     
-    # Setup environment first (Anaconda PATH)
-    setup_environment
-    
-    # Setup Homebrew environment (critical for Tahoe)
+    # Setup Homebrew environment first (critical for Tahoe)
     setup_homebrew_environment
     
     detect_macos
     install_homebrew
-    
-    # Verificar Xcode LOGO NO INÍCIO (antes de tudo)
-    verify_and_fix_xcode
-    
     configure_python
     create_python_symlinks
     install_dev_tools
